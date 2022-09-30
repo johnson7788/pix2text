@@ -153,28 +153,29 @@ class Pix2Text(object):
     def __call__(self, img: Union[str, Path, Image.Image]) -> Dict[str, Any]:
         return self.recognize(img)
 
-    def recognize(self, img: Union[str, Path, Image.Image]) -> Dict[str, Any]:
+    def recognize(self, img: Union[str, Path, Image.Image], image_type="auto") -> Dict[str, Any]:
         """
 
         Args:
             img (str or Image.Image): an image path, or `Image.Image` loaded by `Image.open()`
-
+        image_type: auto表示自动识别要进行的ocr类型, 支持： general，formula, auto
         Returns: a dict, with keys:
            `image_type`: 图像类别；
            `text`: 识别出的文字或Latex公式
 
         """
-        if isinstance(img, Image.Image):
-            _img = torch.tensor(np.asarray(img.convert('RGB')))
-            res = self.image_clf.predict_images([_img])[0]
-        else:
-            res = self.image_clf.predict_images([img])[0]
-        logger.debug('CLF Result: %s', res)
-        image_type = res[0]
-        if res[1] < self.thresholds['formula2general'] and res[0] == 'formula':
-            image_type = 'general'
-        if res[1] < self.thresholds['english2general'] and res[0] == 'english':
-            image_type = 'general'
+        if image_type == "auto":
+            if isinstance(img, Image.Image):
+                _img = torch.tensor(np.asarray(img.convert('RGB')))
+                res = self.image_clf.predict_images([_img])[0]
+            else:
+                res = self.image_clf.predict_images([img])[0]
+            logger.debug('CLF Result: %s', res)
+            image_type = res[0]
+            if res[1] < self.thresholds['formula2general'] and res[0] == 'formula':
+                image_type = 'general'
+            if res[1] < self.thresholds['english2general'] and res[0] == 'english':
+                image_type = 'general'
         if image_type == 'formula':
             result = self._latex(img)
         else:
