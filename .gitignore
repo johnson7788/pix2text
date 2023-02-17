@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+cnocr_model
+cnstd_model
+pix2text_model

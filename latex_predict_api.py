@@ -17,6 +17,7 @@ import time
 import logging
 import requests
 import base64
+import argparse
 from flask import Flask, request, jsonify, abort
 from pix2text import Pix2Text
 
@@ -29,7 +30,13 @@ logging.basicConfig(
 logger = logging.getLogger("Main")
 
 class LatexModel(object):
-    def __init__(self, verbose=0):
+    def __init__(self, verbose=0, cpu=False):
+        """
+        默认就是CPU启动的，GPU还没看怎么弄
+        Args:
+            verbose ():
+            cpu ():
+        """
         self.verbose = verbose
         self.upload_dir = 'runs/api/uploads/'
         if not os.path.exists(self.upload_dir):
@@ -178,7 +185,17 @@ def predict():
     logger.info(f"预测的结果是:{results}")
     return jsonify(results)
 
+def parse_args():
+    """
+    返回arg变量和help
+    :return:
+    """
+    parser = argparse.ArgumentParser(description="YOLO 推理",formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-cpu', "--cpu", action='store_true', help="是否只使用cpu推理")
+    return parser.parse_args(), parser.print_help
+
 if __name__ == "__main__":
-    latex_model = LatexModel()
+    arg, helpmsg = parse_args()
+    latex_model = LatexModel(cpu=arg.cpu)
     app.run(host='0.0.0.0', port=7800, debug=False, threaded=True)
 
