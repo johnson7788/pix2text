@@ -83,9 +83,10 @@ class LatexModel(object):
     def predict(self, image_name, image_type="auto"):
         # image_type: auto表示自动识别要进行的ocr类型, 支持： general，formula, auto
         start_time = time.time()
-        result = self.model.recognize(img=image_name, image_type=image_type)
-        result_image_type = result['image_type']
-        result_text = result['text']
+        result = self.model.recognize(img=image_name, use_analyzer=False,image_type=image_type)
+        image0_result = result[0]
+        result_image_type = image0_result['type']
+        result_text = image0_result['text']
         print(f"要对图片进行的识别类型是: {result_image_type}")
         model_time = time.time() - start_time
         print(f"图片的是: {image_name}， 耗时是: {model_time}")

@@ -251,14 +251,16 @@ class Pix2Text(object):
             img0 = read_img(img, return_type='Image')
         width, height = img0.size
         _img = torch.tensor(np.asarray(img0))
-        res = self.image_clf.predict_images([_img])[0]
-        logger.debug('CLF Result: %s', res)
-
-        image_type = res[0]
-        if res[1] < self.thresholds['formula2general'] and res[0] == 'formula':
-            image_type = 'general'
-        if res[1] < self.thresholds['english2general'] and res[0] == 'english':
-            image_type = 'general'
+        if "image_type" in kwargs:
+            image_type = kwargs["image_type"]
+        else:
+            res = self.image_clf.predict_images([_img])[0]
+            logger.debug('CLF Result: %s', res)
+            image_type = res[0]
+            if res[1] < self.thresholds['formula2general'] and res[0] == 'formula':
+                image_type = 'general'
+            if res[1] < self.thresholds['english2general'] and res[0] == 'english':
+                image_type = 'general'
         if image_type == 'formula':
             result = self._latex(img)
         else:
